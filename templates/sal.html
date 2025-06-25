@@ -13,15 +13,6 @@
       </div>
       <div class="col">
         <div class="btn-toolbar mb-2">
-            <div class="btn-group me-2">
-              <button type="button" class="btn btn-outline-secondary" data-command="bold"><i class="bi bi-type-bold"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-command="italic"><i class="bi bi-type-italic"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-command="underline"><i class="bi bi-type-underline"></i></button>
-            </div>
-            <div class="btn-group me-2">
-              <button type="button" class="btn btn-outline-secondary" data-command="insertUnorderedList"><i class="bi bi-list-ul"></i></button>
-              <button type="button" class="btn btn-outline-secondary" data-command="insertOrderedList"><i class="bi bi-list-ol"></i></button>
-            </div>
             <div id="editor" class="form-control" contenteditable="true" style="height: 150px; overflow: auto;"></div>
         <input type="hidden" name="text" id="sal-text">
       </div>
@@ -32,6 +23,9 @@
   </form>
   <form method="post" action="{{ url_for('generate_eml') }}" class="mb-3">
     <button class="btn btn-success" type="submit">Genera EML</button>
+  </form>
+  <form method="post" action="{{ url_for('clear_sal') }}" class="mb-3">
+    <button class="btn btn-danger" type="submit">Svuota tabella</button>
   </form>
   <table class="table table-bordered">
     <thead class="table-light">

@@ -146,6 +146,11 @@ def sal():
     return render_template('sal.html', users=users, assignments=assigned_texts,
                            users_map={u.id: u for u in users})
 
+@app.route('/clear_sal', methods=['POST'])
+def clear_sal():
+    assigned_texts.clear()
+    return redirect(url_for('sal'))
+
 @app.route('/generate_eml', methods=['POST'])
 def generate_eml():
     import io

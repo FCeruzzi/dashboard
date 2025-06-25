@@ -58,7 +58,7 @@ The application listens on port 5000 by default.
 | GET | `/` | Redirects to `/home` | - |
 | GET | `/home` | Landing page | - |
 | GET | `/wapt_editor` | Vulnerability dashboard | login required |
-| GET | `/sal` | Additional page | login required |
+| GET | `/sal` | SAL utility page | - |
 | GET/POST | `/add` | Add vulnerability | admin or editor |
 | GET/POST | `/edit/<id>` | Edit vulnerability | admin or editor |
 | POST | `/delete/<id>` | Delete vulnerability | admin or editor |
