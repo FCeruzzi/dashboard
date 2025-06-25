@@ -11,7 +11,7 @@ A Flask web dashboard for managing vulnerability tests.
 
 ```bash
 git clone https://github.com/FCeruzzi/dashboard.git
-cd dashboard
+cd security_dashboard
 py -3 -m venv .venv
 .venv\scripts\activate
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
