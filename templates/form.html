@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>{{ action }} Vulnerabilità</h2>
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Repository</label>
+      <input type="text" name="repo_name" class="form-control" value="{{ vuln.repo_name if vuln else '' }}" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Titolo</label>
+      <input type="text" name="title" class="form-control" value="{{ vuln.title if vuln else '' }}" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Severity</label>
+      <input type="text" name="severity" class="form-control" value="{{ vuln.severity if vuln else '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Descrizione</label>
+      <textarea name="description" class="form-control">{{ vuln.description if vuln else '' }}</textarea>
+    </div>
+    <hr>
+    <h5>Campi Extra</h5>
+    <div id="extra-fields">
+      {% if vuln %}
+        {% for idx, (k, v) in enumerate(vuln.extra_data().items()) %}
+        <div class="row mb-2">
+          <div class="col">
+            <input type="text" name="extra_key_{{ idx }}" class="form-control" placeholder="Chiave" value="{{ k }}">
+          </div>
+          <div class="col">
+            <input type="text" name="extra_val_{{ idx }}" class="form-control" placeholder="Valore" value="{{ v }}">
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <button type="button" class="btn btn-sm btn-info mb-3" onclick="addField()">Aggiungi Campo</button>
+    <div>
+      <button type="submit" class="btn btn-success">{{ action }}</button>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">Annulla</a>
+    </div>
+  </form>
+  <script>
+    let fieldCount = {{ vuln.extra_data()|length if vuln else 0 }};
+    function addField() {
+      const container = document.getElementById('extra-fields');
+      const row = document.createElement('div');
+      row.className = 'row mb-2';
+      row.innerHTML = `
+        <div class="col"><input type="text" name="extra_key_${fieldCount}" class="form-control" placeholder="Chiave"></div>
+        <div class="col"><input type="text" name="extra_val_${fieldCount}" class="form-control" placeholder="Valore"></div>
+      `;
+      container.appendChild(row);
+      fieldCount++;  
+    }
+  </script>
+{% endblock %}
