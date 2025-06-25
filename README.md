@@ -10,8 +10,8 @@ A Flask web dashboard for managing vulnerability tests.
 ## Installation
 
 ```bash
-git clone https://github.com/FCeruzzi/security_dashboard.git
-cd security_dashboard
+git clone https://github.com/FCeruzzi/dashboard.git
+cd dashboard
 py -3 -m venv .venv
 .venv\scripts\activate
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
@@ -23,7 +23,11 @@ pip install -r .\requirements.txt
 
 The app relies on Flask's standard environment variables when using the `flask` command:
 
-- `FLASK_APP` – module to run (set to `app.py`).
+- `FLASK_APP` – module to run (set to `app.py`
+
+## Customizing Email Template
+
+The file `templates/email_template.eml` is used when generating email messages from the SAL page. Update this template to change the default subject, sender, or body layout.
 - `FLASK_ENV` – set to `development` to enable debug mode.
 - `FLASK_RUN_PORT` – port used by `flask run` (optional).
 
@@ -75,3 +79,7 @@ The application uses *Flask‑Login* for session management:
 5. Sessions can be terminated with `/logout`.
 
 To change the secret key or database path edit the corresponding values in `app.py`.
+
+## Customizing Email Template
+
+The file `templates/email_template.eml` is used when generating email messages from the SAL page. Update this template to change the default subject, sender, or body layout.

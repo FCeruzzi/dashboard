@@ -1,18 +1,26 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+from flask import Flask, render_template, render_template_string, request, redirect, url_for, flash, send_file
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from models import db, User, Vulnerability
+import logging
+import sys
 
 # Config paths
 basedir = os.path.abspath(os.path.dirname(__file__))
 template_dir = os.path.join(basedir, 'templates')
 static_dir = os.path.join(basedir, 'static')
+EMAIL_TEMPLATE_PATH = os.path.join(template_dir, 'email_template.eml')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'vulnerabilities.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    force=True,
+)
 # Init extensions
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -154,13 +162,17 @@ def clear_sal():
 @app.route('/generate_eml', methods=['POST'])
 def generate_eml():
     import io
+    template_path = os.path.join(template_dir, 'email_template.eml')
+    with open(template_path, 'r', encoding='utf-8') as f:
+        template = f.read()
     mem = io.BytesIO()
-    parts = []
-    for uid, text in assigned_texts.items():
-        user = User.query.get(uid)
-        if user:
-            parts.append(f"{user.username}\n{text}\n\n")
-    mem.write("".join(parts).encode("utf-8"))
+    messages = []
+    for _, text in assigned_texts.items():
+        logging.info("Testo: " + str(text))
+        msg = template.replace('[Testo]', text)
+        messages.append(msg.rstrip('\n') + '\n\n')
+
+    mem.write(''.join(messages).encode('utf-8'))
     mem.seek(0)
     return send_file(mem, download_name='emails.eml', as_attachment=True)
 
@@ -232,4 +244,5 @@ def duplicate(vuln_id):
     return redirect(url_for('wapt_editor'))
 
 if __name__ == '__main__':
+    logging.info('Starting server...')
     app.run(debug=True)

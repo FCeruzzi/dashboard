@@ -25,5 +25,5 @@ document.addEventListener('DOMContentLoaded', function () {
     // copy plain text before submit
     form.addEventListener('submit', function(){
       hiddenInput.value = editor.innerText;
-    });
+    });    
   });

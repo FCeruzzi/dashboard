@@ -13,12 +13,13 @@
       </div>
       <div class="col">
         <div class="btn-toolbar mb-2">
-            <div id="editor" class="form-control" contenteditable="true" style="height: 150px; overflow: auto;"></div>
+          <div id="editor" class="form-control" contenteditable="true" style="height: 150px; overflow: auto;"></div>
+        </div>
         <input type="hidden" name="text" id="sal-text">
       </div>
       <div class="col-auto">
         <button class="btn btn-primary" type="submit">Assegna</button>
-      </div>
+      </div>  
     </div>
   </form>
   <form method="post" action="{{ url_for('generate_eml') }}" class="mb-3">
