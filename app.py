@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from models import db, User, Vulnerability
 
@@ -9,7 +9,7 @@ template_dir = os.path.join(basedir, 'templates')
 static_dir = os.path.join(basedir, 'static')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
-app.config['SECRET_KEY'] = 'supersecretkey'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'vulnerabilities.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -18,12 +18,16 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'home'
 
+# In-memory storage for text assigned to each user on the SAL page
+assigned_texts = {}
+
 # Create tables and default admin
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
         admin = User(username='admin', role='admin')
-        admin.set_password('admin')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
+        admin.set_password(admin_password)
         db.session.add(admin)
         db.session.commit()
 
@@ -131,10 +135,28 @@ def wapt_editor():
     types = sorted({v.severity for v in vulns if v.severity})
     return render_template('index.html', vulns=vulns, types=types)
 
-@app.route('/sal')
-@login_required
+@app.route('/sal', methods=['GET', 'POST'])
 def sal():
-    return render_template('sal.html')
+    users = User.query.all()
+    if request.method == 'POST':
+        user_id = int(request.form.get('user_id', 0))
+        text = request.form.get('text', '')
+        if user_id:
+            assigned_texts[user_id] = text
+    return render_template('sal.html', users=users, assignments=assigned_texts,
+                           users_map={u.id: u for u in users})
+
+@app.route('/generate_eml', methods=['POST'])
+def generate_eml():
+    import io, zipfile
+    mem = io.BytesIO()
+    with zipfile.ZipFile(mem, 'w') as zf:
+        for uid, text in assigned_texts.items():
+            user = User.query.get(uid)
+            if user:
+                zf.writestr(f"{user.username}.eml", f"{user.username}\n\n{text}")
+    mem.seek(0)
+    return send_file(mem, download_name='emails.zip', as_attachment=True)
 
 @app.route('/add', methods=['GET', 'POST'])
 @login_required

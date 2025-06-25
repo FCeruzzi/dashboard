@@ -1,8 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import logging
 
 db = SQLAlchemy()
+logger = logging.getLogger(__name__)
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -29,7 +31,8 @@ class Vulnerability(db.Model):
     def extra_data(self):
         try:
             return json.loads(self.extra or "{}")
-        except:
+        except json.JSONDecodeError as e:
+            logger.warning("Failed to decode extra JSON for Vulnerability %s: %s", self.id, e)
             return {}
 
     def set_extra(self, data: dict):
