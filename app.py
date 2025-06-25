@@ -100,6 +100,22 @@ def add_user():
             return redirect(url_for('index'))
     return render_template('add_user.html')
 
+@app.route('/users', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def users():
+    show_user_id = None
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        admin = User.query.get(current_user.id)
+        if admin and admin.check_password(request.form.get('admin_password', '')):
+            show_user_id = int(user_id or 0)
+        else:
+            flash('Password amministratore non valida', 'danger')
+    all_users = User.query.all()
+    return render_template('users.html', users=all_users,
+                           show_user_id=show_user_id)
+
 @app.route('/')
 @login_required
 def index():
