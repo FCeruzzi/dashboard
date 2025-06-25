@@ -10,7 +10,7 @@ A Flask web dashboard for managing vulnerability tests.
 ## Installation
 
 ```bash
-git clone <repo>
+git clone https://github.com/FCeruzzi/dashboard.git
 cd dashboard
 py -3 -m venv .venv
 .venv\scripts\activate

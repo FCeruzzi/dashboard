@@ -148,15 +148,16 @@ def sal():
 
 @app.route('/generate_eml', methods=['POST'])
 def generate_eml():
-    import io, zipfile
+    import io
     mem = io.BytesIO()
-    with zipfile.ZipFile(mem, 'w') as zf:
-        for uid, text in assigned_texts.items():
-            user = User.query.get(uid)
-            if user:
-                zf.writestr(f"{user.username}.eml", f"{user.username}\n\n{text}")
+    parts = []
+    for uid, text in assigned_texts.items():
+        user = User.query.get(uid)
+        if user:
+            parts.append(f"{user.username}\n{text}\n\n")
+    mem.write("".join(parts).encode("utf-8"))
     mem.seek(0)
-    return send_file(mem, download_name='emails.zip', as_attachment=True)
+    return send_file(mem, download_name='emails.eml', as_attachment=True)
 
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
