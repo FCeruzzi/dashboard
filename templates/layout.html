@@ -9,24 +9,30 @@
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-dark bg-dark px-3">
-  <a class="navbar-brand" href="#">WAPT Editor v2.4 (Prod) - Pagina di Amministrazione</a>
-  <div><a href="/logout" class="btn btn-sm btn-outline-light">Logout</a></div>
+  {% if current_user.is_authenticated %}
+    <a class="navbar-brand" href="#">WAPT Editor</a>
+    <div><a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">Logout</a></div>
+  {% else %}
+    <span class="navbar-brand mb-0 h1">Vulnerability Dashboard</span>
+  {% endif %}
 </nav>
 <div class="container-fluid">
   <div class="row">
-    <!-- Sidebar filtro -->
-    <nav class="col-md-2 d-none d-md-block bg-white sidebar py-3">
-      <h6>Ricerca Vulnerabilità per tipo</h6>
-      <select id="severity-filter" class="form-select mb-3">
-        <option value="">Tutti</option>
-        {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
-      </select>
-      <h6>Colonne visualizzate</h6>
-      <p><small>Opzioni</small></p>
-    </nav>
+    {% if current_user.is_authenticated %}
+      <!-- Sidebar filtro -->
+      <nav class="col-md-2 d-none d-md-block bg-white sidebar py-3">
+        <h6>Ricerca Vulnerabilità per tipo</h6>
+        <select id="severity-filter" class="form-select mb-3">
+          <option value="">Tutti</option>
+          {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+        </select>
+        <h6>Colonne visualizzate</h6>
+        <p><small>Opzioni</small></p>
+      </nav>
+    {% endif %}
 
     <!-- Main content -->
-    <main class="col-md-10 ms-sm-auto px-4">
+    <main class="{% if current_user.is_authenticated %}col-md-10{% else %}col-md-12{% endif %} ms-sm-auto px-4">
       {% block content %}{% endblock %}
     </main>
   </div>
