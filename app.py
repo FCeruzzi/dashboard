@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Init extensions
 db.init_app(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'home'
 
 # Create tables and default admin
 with app.app_context():
@@ -47,7 +47,7 @@ def role_required(*roles):
         def decorated(*args, **kwargs):
             if not current_user.is_authenticated or current_user.role not in roles:
                 flash('Accesso negato', 'danger')
-                return redirect(url_for('index'))
+                return redirect(url_for('home'))
             return f(*args, **kwargs)
         return decorated
     return wrapper
@@ -58,7 +58,7 @@ def login():
         user = User.query.filter_by(username=request.form['username']).first()
         if user and user.check_password(request.form['password']):
             login_user(LoginUser(user))
-            return redirect(url_for('index'))
+            return redirect(url_for('wapt_editor'))
         flash('Credenziali errate', 'danger')
     return render_template('login.html')
 
@@ -66,7 +66,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
@@ -77,7 +77,7 @@ def change_password():
             user.set_password(request.form['new_password'])
             db.session.commit()
             flash('Password aggiornata', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('wapt_editor'))
         flash('Password corrente sbagliata', 'danger')
     return render_template('change_password.html')
 
@@ -97,7 +97,7 @@ def add_user():
             db.session.add(new_user)
             db.session.commit()
             flash('Utente creato', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('wapt_editor'))
     return render_template('add_user.html')
 
 @app.route('/users', methods=['GET', 'POST'])
@@ -117,18 +117,31 @@ def users():
                            show_user_id=show_user_id)
 
 @app.route('/')
+def root():
+    return redirect(url_for('home'))
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+@app.route('/wapt_editor')
 @login_required
-def index():
+def wapt_editor():
     vulns = Vulnerability.query.all()
     types = sorted({v.severity for v in vulns if v.severity})
     return render_template('index.html', vulns=vulns, types=types)
+
+@app.route('/sal')
+@login_required
+def sal():
+    return render_template('sal.html')
 
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add():
     if current_user.role not in ['admin', 'editor']:
         flash('Permessi insufficienti', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('wapt_editor'))
     if request.method == 'POST':
         repo = request.form['repo_name']
         title = request.form['title']
@@ -143,7 +156,7 @@ def add():
         vuln.set_extra(extras)
         db.session.add(vuln)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('wapt_editor'))
     return render_template('form.html', action='Add', vuln=None)
 
 @app.route('/edit/<int:vuln_id>', methods=['GET', 'POST'])
@@ -163,7 +176,7 @@ def edit(vuln_id):
                 extras[val] = request.form.get(f'extra_val_{idx}', '')
         vuln.set_extra(extras)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('wapt_editor'))
     return render_template('form.html', action='Edit', vuln=vuln)
 
 @app.route('/delete/<int:vuln_id>', methods=['POST'])
@@ -173,7 +186,7 @@ def delete(vuln_id):
     vuln = Vulnerability.query.get_or_404(vuln_id)
     db.session.delete(vuln)
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('home'))
 
 @app.route('/duplicate/<int:vuln_id>', methods=['POST'])
 @login_required
@@ -188,7 +201,7 @@ def duplicate(vuln_id):
     )
     db.session.add(dup)
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('wapt_editor'))
 
 if __name__ == '__main__':
     app.run(debug=True)
