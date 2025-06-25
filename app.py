@@ -72,14 +72,33 @@ def logout():
 @login_required
 def change_password():
     if request.method == 'POST':
-        if current_user.check_password(request.form['old_password']):
-            u = User.query.get(current_user.id)
-            u.set_password(request.form['new_password'])
+        user = User.query.get(current_user.id)
+        if user and user.check_password(request.form['old_password']):
+            user.set_password(request.form['new_password'])
             db.session.commit()
             flash('Password aggiornata', 'success')
             return redirect(url_for('index'))
         flash('Password corrente sbagliata', 'danger')
     return render_template('change_password.html')
+
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def add_user():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        role = request.form['role']
+        if User.query.filter_by(username=username).first():
+            flash('Username già esistente', 'danger')
+        else:
+            new_user = User(username=username, role=role)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Utente creato', 'success')
+            return redirect(url_for('index'))
+    return render_template('add_user.html')
 
 @app.route('/')
 @login_required

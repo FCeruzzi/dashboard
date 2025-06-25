@@ -11,7 +11,13 @@
 <nav class="navbar navbar-dark bg-dark px-3">
   {% if current_user.is_authenticated %}
     <a class="navbar-brand" href="#">WAPT Editor</a>
-    <div><a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">Logout</a></div>
+    <div>
+      <a href="{{ url_for('change_password') }}" class="btn btn-sm btn-outline-light me-2">Cambio password</a>
+      {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('add_user') }}" class="btn btn-sm btn-outline-light me-2">Nuovo utente</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">Logout</a>
+    </div>
   {% else %}
     <span class="navbar-brand mb-0 h1">Vulnerability Dashboard</span>
   {% endif %}
